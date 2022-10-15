@@ -1,0 +1,4 @@
+/inventory/hosts
+/templates/*
+/group_vars/*
+.env

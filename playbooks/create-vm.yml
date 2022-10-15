@@ -1,0 +1,44 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+    vcenter_server: "{{ lookup('env', 'VCENTER_SERVER') }}"
+    vcenter_user: "{{ lookup('env', 'VCENTER_USER') }}"
+    vcenter_pass: "{{ lookup('env', 'VCENTER_PASS') }}"
+    datacenter_name: "{{ lookup('env', 'DATACENTER_NAME') }}"
+    datastore: "{{ lookup('env', 'DATASTORE') }}"
+    domain: "{{ lookup('env', 'DOMAIN') }}"
+    cluster_name: "{{ lookup('env', 'CLUSTER_NAME') }}"
+  vars_prompt:
+    - name: "vmname"
+      prompt: "What would you like to name the new VM?"
+      private: false
+  tasks:
+  - name: Create VM
+    vmware_guest:
+          hostname: "{{ vcenter_server }}"
+          username: "{{ vcenter_user }}"
+          password: "{{ vcenter_pass }}"
+          validate_certs: False
+          name: "{{ vmname }}"
+          datacenter: "{{ datacenter_name }}"
+          folder: /{{ datacenter_name }}/wkld
+          cluster: "{{ cluster_name }}"
+          guest_id: "ubuntu64Guest"
+          networks:
+            - name: "Server (13)"
+              type: dhcp
+          hardware:
+            num_cpus: 2
+            memory_mb: 4096
+          disk:
+          - size_gb: "{{ disk_size | default(32) }}"
+            type: thin
+            datastore: "{{ datastore }}"
+          customization:
+            hostname: "{{ vmname }}"
+            dns_servers:
+              - 192.168.13.1
+          state: poweredon
+          wait_for_ip_address: false
+    delegate_to: localhost

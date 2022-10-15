@@ -1,0 +1,56 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+    vcenter_server: "{{ lookup('env', 'VCENTER_SERVER') }}"
+    vcenter_user: "{{ lookup('env', 'VCENTER_USER') }}"
+    vcenter_pass: "{{ lookup('env', 'VCENTER_PASS') }}"
+    datacenter_name: "{{ lookup('env', 'DATACENTER_NAME') }}"
+    datastore: "{{ lookup('env', 'DATASTORE') }}"
+    domain: "{{ lookup('env', 'DOMAIN') }}"
+    cluster_name: "{{ lookup('env', 'CLUSTER_NAME') }}"
+  vars_prompt:
+    - name: vmname
+      prompt: "Please create a VM name"
+      private: false
+    - name: ipaddr
+      prompt: "Please enter an IP address"
+      private: false
+    - name: subnetmask
+      prompt: "Please enter a netmask"
+      private: false
+    - name: ipgw
+      prompt: "Please enter a gateway"
+      private: false
+  tasks:
+  - name: Create VM
+    vmware_guest:
+      hostname: "{{ vcenter_server }}"
+      username: "{{ vcenter_user }}"
+      password: "{{ vcenter_pass }}"
+      validate_certs: False
+      name: "{{ vmname }}"
+      datacenter: "{{ datacenter_name }}"
+      folder: /VMs/
+      template: ubuntu-server-2204
+      cluster: "{{ cluster_name }}"
+      guest_id: "ubuntu64Guest"
+      networks:
+        - name: Server
+          type: static
+          ip: "{{ ipaddr }}"
+          netmask: "{{ subnetmask | default(255.255.255.0) }}"
+          gateway: "{{ ipgw | default(192.168.13.1) }}"
+          device_type: vmxnet3
+      hardware: 
+        version: latest
+      customization:
+        hostname: "{{ vmname }}"
+        dns_suffix: "{{ domain }}"
+        domain: "{{ domain }}"
+        dns_servers:
+          - 192.168.13.1
+        timezone: "{{ lookup('env', 'TIMEZONE') }}"
+      state: poweredon
+      wait_for_ip_address: yes
+    delegate_to: localhost

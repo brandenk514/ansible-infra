@@ -1,0 +1,17 @@
+---
+- hosts: "*"
+  become: true
+  tasks:
+  - name: Copy cloud-init config
+    template: src=../templates/server/cloud.cfg dest=/etc/cloud/
+  - name: Copy fake cloud config
+    template: src=../templates/server/99-fake_cloud.cfg dest=/etc/cloud/
+  - name: Clean cloud-init
+    ansible.builtin.shell:
+      cmd: cloud-init clean
+  - name: Run cloud init
+    ansible.builtin.shell:
+      cmd: cloud-init
+  - name: Reboot to apply cloud-init
+    reboot:
+      reboot_timeout: 3600
