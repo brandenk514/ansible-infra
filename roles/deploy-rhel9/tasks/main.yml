@@ -1,0 +1,12 @@
+---
+  - name: "Update cache"
+    dnf:
+      update_cache: yes
+  - name: "Upgrade packages"
+    dnf:
+      name: "*"
+      state: latest
+  - name: "Remove not needed dependencies and packages"
+    dnf:
+      autoremove: yes
+

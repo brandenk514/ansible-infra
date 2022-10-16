@@ -1,6 +1,4 @@
 ---
-become: true
-tasks:
   - name: "Clear out local repo before getting new packages"
     apt:
       clean: "yes"
