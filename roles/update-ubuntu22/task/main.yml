@@ -1,10 +1,16 @@
 ---
 become: true
 tasks:
+  - name: "Clear out local repo before getting new packages"
+    apt:
+      clean: "yes"
   - name: Update all packages
     apt:
       update_cache: yes
-      cache_valid_time: 3600
+      cache_valid_time: 86400
+      upgrade: "yes"
+  - name: Update all distro packages
+    apt:
       upgrade: "yes"
   - name: Update all distro packages
     apt:
